@@ -1,81 +1,143 @@
-//  ================================
-//             LIBRARIES
-//  ================================
+//  ========================================
+//                  LIBRARIES
+//  ========================================
 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
 
-//  ================================
-//              CONSTATNS
-//  ================================
+//  ========================================
+//                  CONSTATNS
+//  ========================================
 
+//  USEFUL
 #define ID_STUDENT_FILE 1
 #define ID_RESULTS_FILE 2
 #define TOT_PROVES 2
 #define DIM 50
 
-//  PROGRAM 1
+//  MENU OPTIONS PROGRAM 1
 #define ADD_STUDENT_OPTION 1
 #define MODIFY_STUDENT_OPTION 2
 #define DELETE_STUDENT_OPTION 3
 #define ADD_RESULT_OPTION 4
 #define MODIFY_RESULT_OPTION 5
 #define DELETE_RESULT_OPTION 6
+#define PRINT_CUR_STUDENTS 7
+#define PRINT_CUR_RESULTS 8
 #define EXIT_OPTION 0
 
-//  PROGRAM 2
+//  FILE'S DIRECTORY PROGRAM 2
 #define ENTRY_FILES_DIR "../Program1/"
 
-//  ======================================
-//              DATA STRUCTURES
-//  ======================================
+//  ==============================================
+//                  DATA STRUCTURES
+//  ==============================================
+
+//  NODE WITH COURSES' INFORMATION
 typedef struct {
     char name[DIM];
     float classifications[TOT_PROVES];
+    //  ONLY TO USE IN PRINTS OF PROGRAM 1
+    char aux_id[DIM/2];
 } CourseInfo;
 
-typedef struct aux_course {
+//  TREE WITH ALL COURSES OF EACH STUDENT
+typedef struct aux_course CourseNode;
+struct aux_course {
     CourseInfo *course;
-    struct aux_course *left;
-    struct aux_course *right;
-} CourseNode;
+    CourseNode *left;
+    CourseNode *right;
+};
 
+//  NODE WITH EACH STUDENT'S INFORMATION (INCLUDING THEIR COURSES)
 typedef struct {
     char name[DIM*2];
     char id_number[DIM/2];
     CourseNode* signed_in_courses;
 } StudentInfo;
 
-typedef struct aux_student {
+//  TREE WITH ALL THE DATA
+typedef struct aux_student StudentNode;
+struct aux_student {
     StudentInfo *student;
-    struct aux_student *left;
-    struct aux_student *right;
-} StudentNode;
+    StudentNode *left;
+    StudentNode *right;
+};
 
 
-//  ================================
-//             FUNCTIONS
-//  ================================
+//  ========================================
+//                  FUNCTIONS
+//  ========================================
 
-/*------------------------BASIC FUNCTIONS-----------------------*/
-//  Check if it is a correct string
+/*============================BASIC FUNCTIONS============================*/
+
+//  RECEIVE A STRING AND A MESSAGE (IN CASE OF ERROR) TO PRINT
+//  RETURNS 1 IF IT IS A CORRECT STRING, -1 IF IT ISN'T
 int stringChecker(char*, char*);
-//  Check if it is a correct number
-int numberChecker(char*, char, char*);
 
-/*------------------------PROGRAM 1 FUNCTIONS-----------------------*/
-//  JUST CLEAR THE CONSOLE AND PRINTS THE ENTIRE MENU
-void mainMenu();
-//  WRITE A NEW STUDENT OR RESULT IN THE RIGHT FILE
-void addElement(FILE*, int);
+//  RECEIVE A STRING, A CHARACTER AND A MESSAGE (IN CASE OF ERROR) TO PRINT
+//  THE CHARACTER CAN ONLY BE 'i', 's' DEPENDING THE TYPE OF DATA WE WANT
+//      IF 'i' RETURN atoi()
+//      ELSE RETURN 1 OR -1 IF THE STRING NUMBER IS CORRECT OR WRONG
+int intChecker(char*, char, char*);
 
-/*------------------------PROGRAM 2 FUNCTIONS-----------------------*/
-void receiveFileName(char*, int);
+//  RECEIVE A STRING, A CHARACTER AND A MESSAGE (IN CASE OF ERROR) TO PRINT
+//  THE CHARACTER CAN ONLY BE 'f', 's' DEPENDING THE TYPE OF DATA WE WANT
+//      IF 'f' RETURN atof()
+//      ELSE RETURN 1 OR -1 IF THE STRING NUMBER IS CORRECT OR WRONG
+float floatChecker(char* str_number, char number_type, char* error);
+
+
+//  RECEIVES THE STUDENT'S FILE AND AN EMPTY TREE
+//  RETURNS THE FILLED TREE
 StudentNode* readStudents(FILE*, StudentNode*);
-StudentNode* readResults(FILE*, StudentNode*);
+
+//  RECURSIVELY RECEIVES A TREE AND A NODE
+//  RECURSIVELY RETURNS THE ORIGINAL TREE WITH THE NODE ADDED
 StudentNode* addStudent(StudentNode*, StudentInfo*);
+
+//  RECURSIVELY RECEIVES A TREE AND A NODE
+//  RECURSIVELY RETURNS THE ORIGINAL TREE WITH THE NODE ADDED
 CourseNode* addCourse(CourseNode*, CourseInfo*);
+
+
+//  RECURSIVELY RECEIVES A TREE AND PRINTS IT'S NODES
+void printStudentsTree(StudentNode*);
+
+//  RECURSIVELY RECEIVES A TREE AND PRINTS IT'S NDOES
+void printCoursesTree(CourseNode*);
+
+
+
+/*============================PROGRAM 1 FUNCTIONS============================*/
+
+//  JUST CLEAR THE CONSOLE AND PRINTS THE ENTIRE MAIN MENU
+void mainMenu();
+
+//  WRITE AN ELEMENT (STUDENT OR RESULT) IN THE CORRECT FILE 
+//  RETURN A TREE WITH THE NEW ELEMENT/NODE (STUDENT OR RESULT)
+StudentNode* newStudent(FILE*, StudentNode*);
+CourseNode* newResult(FILE*, CourseNode*);
+
+//  RECEIVES THE RESULTS' FILE AND AN EMPTY TREE
+//  RETURNS THE FILLED TREE
+//  DIFFERENT OF "readResults()" THIS ONE JUST RETURNS A TREE OF RESULTS
+CourseNode* checkResults(FILE*, CourseNode*);
+
+
+
+/*============================PROGRAM 2 FUNCTIONS============================*/
+
+//  RECEIVES THE FILE'S DIRECTORY AND AN INT TO IDENITFY WICH FILE IT IS
+void receiveFileName(char*, int);
+
+//  RECEIVES THE RESULTS' FILE AND AN EMPTY TREE
+//  FILLS STUDENT'S NODES WITH THEIR RESPECTIVE COURSES AND RESULTS
+//  RETURNS THE FILLED TREE
+StudentNode* readResults(FILE*, StudentNode*);
+
+//  RECEIVES A TREE AND AN ID NUMBER
+//  RETURNS THE CORRESPONDING ID NODE
 StudentInfo* searchStudentTree(StudentNode*, char*);
-void printTree(StudentNode*);

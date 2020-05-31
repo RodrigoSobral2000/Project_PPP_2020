@@ -89,16 +89,29 @@ CourseNode* addCourse(CourseNode *tree, CourseInfo* new_course) {
     return tree;
 }
 
-StudentInfo* searchStudentTree(StudentNode* tree, char* id) {
+StudentInfo* searchStudentTreeByID(StudentNode* tree, char* id) {
     if (tree==NULL) return NULL;
     else {
         StudentInfo* student_searched= (StudentInfo*)malloc(sizeof(StudentInfo));
         if (strcasecmp(tree->student->id_number, id)!=0) {
-            student_searched= searchStudentTree(tree->left, id);
+            student_searched= searchStudentTreeByID(tree->left, id);
             if (student_searched!=NULL) return student_searched;
-            student_searched= searchStudentTree(tree->right, id);
+            student_searched= searchStudentTreeByID(tree->right, id);
             return student_searched;
         } else return tree->student;
+    }
+}
+
+CourseInfo* searchResultTreeByIdAndName(CourseNode* tree, char* id, char* name) {
+    if (tree==NULL) return NULL;
+    else {
+        CourseInfo* result_searched= (CourseInfo*)malloc(sizeof(CourseInfo));
+        if (strcasecmp(tree->course->aux_id, id)!=0 && strcasecmp(tree->course->name, name)!=0) {
+            result_searched= searchResultTreeByIdAndName(tree->left, id, name);
+            if (result_searched!=NULL) return result_searched;
+            result_searched= searchResultTreeByIdAndName(tree->right, id, name);
+            return result_searched;
+        } else return tree->course;
     }
 }
 
@@ -114,7 +127,7 @@ void printStudentsTree(StudentNode* tree) {
 void printCoursesTree(CourseNode* tree) {
     if (tree != NULL) {
         printCoursesTree(tree->left);
-        printf("Course: %s\tProve1: %.2f\tProve2: %.2f\n", tree->course->name, tree->course->classifications[0], tree->course->classifications[1]);
+        printf("Student: %s\tCourse: %s\tProve1: %.2f\tProve2: %.2f\n", tree->course->aux_id, tree->course->name, tree->course->classifications[0], tree->course->classifications[1]);
         printCoursesTree(tree->right);
     }
 }

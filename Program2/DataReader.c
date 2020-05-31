@@ -30,7 +30,7 @@ int main() {
     
     printStudentsTree(tree_root);
 
-    passedStudentsGenerator(tree_root);
+    //passedStudentsGenerator(tree_root);
     printf("\n200! TABLES CREATED WITH SUCESS!");
     fclose(entry_file_students);
     fclose(entry_file_results);
@@ -63,7 +63,7 @@ StudentNode* readResults(FILE* file, StudentNode* tree) {
         if (prove_id==1) new_course->classifications[1]=0;
         else new_course->classifications[0]=0;
 
-        aux_student= searchStudentTree(tree, new_course->aux_id);
+        aux_student= searchStudentTreeByID(tree, new_course->aux_id);
         if (aux_student!=NULL) aux_student->signed_in_courses= addCourse(aux_student->signed_in_courses, new_course);
     }
     free(new_course);

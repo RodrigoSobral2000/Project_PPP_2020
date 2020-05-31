@@ -6,25 +6,21 @@ int main(int argc, char *argv[]) {
     else {
         static FILE *students_file;
         static FILE *results_file;
-        static char aux[DIM];
+        static char students_file_name[DIM/2], results_file_name[DIM/2];
         static StudentNode *students_tree=NULL;
         static CourseNode *results_tree=NULL;
-        
-        //  IF A FILE EXISTS ONLY APPENDS DATA
-        strcpy(aux, strcat(argv[ID_STUDENT_FILE], ".bin"));
-        if(access(aux, F_OK)!=-1) {
-            FILE *fp= fopen(aux, "rb");
-            students_tree= readStudents(fp, students_tree);
-            fclose(fp);
-            students_file= fopen(aux, "ab");
-        } else students_file= fopen(aux, "wb");
-        strcpy(aux, strcat(argv[ID_RESULTS_FILE], ".bin"));
-        if(access(aux, F_OK)!=-1) {
-            FILE *fp= fopen(aux, "rb");
-            results_tree= checkResults(fp, results_tree);
-            fclose(fp);
-            results_file= fopen(aux, "ab");
-        } else results_file= fopen(aux, "wb");
+        strcpy(students_file_name, strcat(argv[ID_STUDENT_FILE], ".bin"));
+        strcpy(results_file_name, strcat(argv[ID_RESULTS_FILE], ".bin"));
+                
+        if(access(students_file_name, F_OK)!=-1) {
+            students_file= fopen(students_file_name, "rb");
+            students_tree= readStudents(students_file, students_tree);
+            fclose(students_file);
+        } if(access(results_file_name, F_OK)!=-1) {
+            results_file= fopen(results_file_name, "rb");
+            results_tree= checkResults(results_file, results_tree);
+            fclose(results_file);
+        }
 
         static int option;
         static char str_option[5];
@@ -40,29 +36,25 @@ int main(int argc, char *argv[]) {
             } while (option<EXIT_OPTION || option>PRINT_CUR_RESULTS);
 
             if (option==ADD_STUDENT_OPTION || option==ADD_RESULT_OPTION) {
-                if (option==ADD_STUDENT_OPTION) students_tree= newStudent(students_file, students_tree);
-                else results_tree= newResult(results_file, results_tree);
+                if (option==ADD_STUDENT_OPTION) students_tree= newStudent(students_tree);
+                else results_tree= newResult(results_tree);
                 sleep(3);
             } else if (option==MODIFY_STUDENT_OPTION || option==MODIFY_RESULT_OPTION) {
-                if (option==MODIFY_STUDENT_OPTION) students_tree= modifyStudent(students_file, students_tree);
-                else results_tree= modifyResult(results_file, results_tree);
+                if (option==MODIFY_STUDENT_OPTION) students_tree= modifyStudent(students_tree);
+                else results_tree= modifyResult(results_tree);
+                sleep(3);
             } else if (option==DELETE_STUDENT_OPTION || option==DELETE_RESULT_OPTION) {
-                //if (option==DELETE_STUDENT_OPTION) deleteElement(students_file, ID_STUDENT_FILE);
-                //else deleteElement(results_file, ID_RESULTS_FILE);
+                //if (option==DELETE_STUDENT_OPTION) deleteElement(ID_STUDENT_FILE);
+                //else deleteElement(ID_RESULTS_FILE);
             } else if (option==PRINT_CUR_STUDENTS) {
                 if (students_tree==NULL) {
                     printf("\nERROR 400! THERES IS NO STUDENTS' DATA SAVED YET!\nBACKING TO MAIN MENU...\n\n");
                     sleep(3);
                 } else {
                     system("cls");
+                    printf("\n=============SIGNED IN STUDENTS=============\n\n");
                     printStudentsTree(students_tree);
                     sleep(7);
-                    /*do {
-                        system("cls");
-                        printStudentsTree(students_tree);
-                        printf("\n\nENTER TO CONTINUE... ");
-                        scanf(" %c", &enter_pressed);
-                    } while (enter_pressed!='\n');*/
                 }
             } else if (option==PRINT_CUR_RESULTS) {
                 if (results_tree==NULL) {
@@ -70,17 +62,13 @@ int main(int argc, char *argv[]) {
                     sleep(3);
                 } else {
                     system("cls");
+                    printf("\n=============SIGNED IN RESULTS=============\n\n");
                     printCoursesTree(results_tree);
                     sleep(7);
-                    /*do {
-                        system("cls");
-                        printCoursesTree(results_tree);
-                        printf("\n\nENTER TO CONTINUE... ");
-                        scanf(" %c", &enter_pressed);
-                    } while (enter_pressed!='\n');*/
                 }
             } else if (option==EXIT_OPTION) {
-                printf("\n200! PROGRAM CLOSED WITH SUCESS!!\n\n");
+                saveData(students_file, results_file, students_tree, results_tree, students_file_name, results_file_name);
+                printf("\n200! PROGRAM CLOSED AND DATA SAVED WITH SUCESS!!\n\n");
                 break;
             }
         }
@@ -110,7 +98,7 @@ void mainMenu() {
     printf("\t|-------------------------------------------------------|\n");
 }
 
-StudentNode* newStudent(FILE *fp, StudentNode* tree) {
+StudentNode* newStudent(StudentNode* tree) {
     StudentInfo* new_student= (StudentInfo*) malloc(sizeof(StudentInfo));
     while(1) {
         printf("\n\tNAME OF THE NEW STUDENT: ");
@@ -124,13 +112,11 @@ StudentNode* newStudent(FILE *fp, StudentNode* tree) {
         if (intChecker(new_student->id_number, 's', "INTRODUCE A VALID STUDENT ID NUMBER")==1) break;
     }
     printf("\n\t200! STUDENT ID NUMBER ADDED WITH SUCESS!!\n");
-    fwrite(new_student->name, sizeof(new_student->name), 1, fp);
-    fwrite(new_student->id_number, sizeof(new_student->id_number), 1, fp);
     tree= addStudent(tree, new_student);
     return tree;
 }
 
-CourseNode* newResult(FILE *fp, CourseNode* tree) {
+CourseNode* newResult(CourseNode* tree) {
     CourseInfo* new_result= (CourseInfo*) malloc(sizeof(CourseInfo));
     static char str_result_id[DIM/5], str_result[DIM/5];
     static int result_id;
@@ -162,11 +148,7 @@ CourseNode* newResult(FILE *fp, CourseNode* tree) {
         else printf("\n\tERROR 406! INTRODUCE A VALID RESULT!\n\n");
     }
     printf("\n\t200! RESULT ADDED WITH SUCESS!!\n");
-    
-    fwrite(new_result->aux_id, sizeof(new_result->aux_id), 1, fp);
-    fwrite(new_result->name, sizeof(new_result->name), 1, fp);
-    fwrite(&result_id, sizeof(int), 1, fp);
-    fwrite(&new_result->classifications[result_id-1], sizeof(new_result->classifications[result_id-1]), 1, fp);
+
     tree= addCourse(tree, new_result);
     return tree;
 }
@@ -177,42 +159,106 @@ StudentNode* modifyStudent(StudentNode* tree) {
         sleep(3);
     } else {
         char id_pretended[DIM/2];
-        StudentInfo* student_found=NULL;
+        StudentInfo* student_found= (StudentInfo*)malloc(sizeof(student_found));
         system("cls");
-        printf("WHAT IS THE ID OF THE STUDENT YOU WANT TO MODIFY?\nID: ");
+        printf("\n=============SIGNED IN STUDENTS=============\n\n");
+        printStudentsTree(tree);
+        printf("\nWHAT IS THE ID OF THE STUDENT YOU WANT TO MODIFY?\nID: ");
         scanf(" %[^\n]", id_pretended);
-        if ((student_found= searchStudentTree(tree, id_pretended))==NULL) {
+        if ((student_found= searchStudentTreeByID(tree, id_pretended))==NULL) {
             printf("\nERROR 404! STUDENT NOT FOUND!\nBACKING TO MAIN MENU...\n");
             sleep(3);
         } else {
-            char *str_option[5], new_name[DIM*2], new_id[DIM/2];
+            char str_option[5], new_name[DIM*2], new_id[DIM/2];
             int option;
             printf("\n200! STUDENT FOUND!!\n\n");
             printf("NAME: %s\nID NUMBER: %s\n\n", student_found->name, student_found->id_number);
             do {
                 printf("WHAT YOU WANT TO CHANGE? [1- NAME | 2- ID]");
                 scanf(" %[^\n]", str_option);
-                option= intChecker(str_option, 'i', "INTRODUCE A VALID OPTION")
+                option= intChecker(str_option, 'i', "INTRODUCE A VALID OPTION");
             } while (option!=1 && option!=2);
             if (option==1) {
                 while (1) {
-                    printf("INSERT A NEW NAME:");
+                    printf("INSERT A NEW NAME: ");
                     scanf(" %[^\n]", new_name);
                     if (stringChecker(new_name, "INTRODUCE A VALID STUDENT NAME")==1) break;
-                } student_found->name=new_name;
+                } strcpy(student_found->name, new_name);
+                printf("\n200! STUDENT NAME CHANGED WITH SUCESS!!\n\n");
             } else {
                 while (1) {
                     printf("INSERT A NEW ID NUMBER:");
                     scanf(" %[^\n]", new_id);
                     if (intChecker(new_id, 's', "INTRODUCE A VALID STUDENT ID NUMBER")==1) break;
-                } student_found->id_number=new_id;
+                } strcpy(student_found->id_number, new_id);
+                printf("\n200! STUDENT ID NUMBER CHANGED WITH SUCESS!!\n\n");
             }
         }
     }
+    return tree;
 }
 
 CourseNode* modifyResult(CourseNode* tree) {
-
+    if (tree==NULL) {
+        printf("\nERROR 400! THERES IS NO STUDENTS' DATA SAVED YET!\nBACKING TO MAIN MENU...\n\n");
+        sleep(3);
+    } else {
+        char student_id[DIM/2], course_name[DIM*2];
+        CourseInfo* result_found= (CourseInfo*)malloc(sizeof(result_found));
+        system("cls");
+        printf("\n=============SIGNED IN RESULTS=============\n\n");
+        printCoursesTree(tree);
+        printf("\nWHAT IS THE STUDENT ID OF THE RESULT YOU WANT TO MODIFY?\nID: ");
+        scanf(" %[^\n]", student_id);
+        printf("\nWHAT IS THE COURSE NAME OF THE RESULT YOU WANT TO MODIFY?\nID: ");
+        scanf(" %[^\n]", course_name);
+        if ((result_found= searchResultTreeByIdAndName(tree, student_id, course_name))==NULL) {
+            printf("\nERROR 404! RESULT NOT FOUND!\nBACKING TO MAIN MENU...\n");
+            sleep(3);
+        } else {
+            char str_option[5];
+            int option;
+            printf("\n200! RESULT FOUND!!\n\n");
+            printf("NAME: %s\nPROVE1: %.2f\tPROVE2: %.2f\n\n", result_found->name, result_found->classifications[0], result_found->classifications[1]);
+            do {
+                printf("WHAT YOU WANT TO CHANGE? [1- NAME | 2- STUDENT ID | 3- PROVE 1 | 4- PROVE 2]");
+                scanf(" %[^\n]", str_option);
+                option= intChecker(str_option, 'i', "INTRODUCE A VALID OPTION");
+            } while (option!=1 && option!=2 && option!=3 && option!=4);
+            if (option==MODIFY_NAME) {
+                char new_name[DIM*2];
+                while (1) {
+                    printf("INSERT A NEW COURSE NAME: ");
+                    scanf(" %[^\n]", new_name);
+                    if (stringChecker(new_name, "INTRODUCE A VALID STUDENT NAME")==1) break;
+                } strcpy(result_found->name, new_name);
+                printf("\n200! COURSE NAME CHANGED WITH SUCESS!!\n\n");
+            } else if (option==MODIFY_ID) {
+                char new_id[DIM/2];
+                while (1) {
+                    printf("INSERT A NEW ID NUMBER:");
+                    scanf(" %[^\n]", new_id);
+                    if (intChecker(new_id, 's', "INTRODUCE A VALID STUDENT ID NUMBER")==1) break;
+                } strcpy(result_found->aux_id, new_id);
+                printf("\n200! STUDENT ID NUMBER CHANGED WITH SUCESS!!\n\n");
+            } else {
+                char str_result[5];
+                float new_result;
+                while (1) {
+                    printf("INSERT THE NEW RESULT:");
+                    scanf(" %[^\n]", str_result);
+                    if ((new_result= floatChecker(str_result, 'f', "INTRODUCE A VALID STUDENT ID NUMBER"))!=-1) break;
+                } 
+                if (option==MODIFY_PROVE1) {
+                    printf("\n200! PROVE 1 RESULT CHANGED WITH SUCESS!!\n\n");
+                    result_found->classifications[0]= new_result;
+                } else {
+                    result_found->classifications[1]= new_result;
+                    printf("\n200! PROVE 2 RESULT CHANGED WITH SUCESS!!\n\n");
+                }
+            }
+        }
+    } return tree;
 }
 
 CourseNode* checkResults(FILE* file, CourseNode* tree) {
@@ -232,4 +278,36 @@ CourseNode* checkResults(FILE* file, CourseNode* tree) {
     }
     free(new_course);
     return tree;
+}
+
+void saveData(FILE* students_file, FILE* results_file, StudentNode* students_tree, CourseNode* results_tree, char* students_file_name, char* results_file_name) {
+    students_file=fopen(students_file_name, "wb");
+    results_file= fopen(results_file_name, "wb");
+    writeStudentsInFile(students_file, students_tree);
+    writeResultsInFile(results_file, results_tree);
+    fclose(students_file);
+    fclose(results_file);
+}
+
+void writeStudentsInFile(FILE* fp, StudentNode* tree) {
+    if (tree != NULL) {
+        writeStudentsInFile(fp, tree->left);
+        fwrite(tree->student->name, sizeof(tree->student->name), 1, fp);
+        fwrite(tree->student->id_number, sizeof(tree->student->id_number), 1, fp);
+        writeStudentsInFile(fp, tree->right);
+    }
+}
+
+void writeResultsInFile(FILE* fp, CourseNode* tree) {
+    if (tree != NULL) {
+        writeResultsInFile(fp, tree->left);
+        int prove_id;
+        fwrite(tree->course->aux_id, sizeof(tree->course->aux_id), 1, fp);
+        fwrite(tree->course->name, sizeof(tree->course->name), 1, fp);
+        if (tree->course->classifications[0]==0) prove_id=2;
+        else prove_id=1;
+        fwrite(&prove_id, sizeof(int), 1, fp);
+        fwrite(&tree->course->classifications[prove_id-1], sizeof(tree->course->classifications[prove_id-1]), 1, fp);
+        writeResultsInFile(fp, tree->right);
+    }
 }

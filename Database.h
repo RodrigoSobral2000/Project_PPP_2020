@@ -17,7 +17,7 @@
 #define TOT_PROVES 2
 #define DIM 50
 
-//  MENU OPTIONS PROGRAM 1
+//  MAIN MENU OPTIONS PROGRAM 1
 #define ADD_STUDENT_OPTION 1
 #define MODIFY_STUDENT_OPTION 2
 #define DELETE_STUDENT_OPTION 3
@@ -27,6 +27,11 @@
 #define PRINT_CUR_STUDENTS 7
 #define PRINT_CUR_RESULTS 8
 #define EXIT_OPTION 0
+
+//  MODIFY MENU OPTIONS PROGRAM 1
+#define MODIFY_NAME 1
+#define MODIFY_ID 2
+#define MODIFY_PROVE1 3
 
 //  FILE'S DIRECTORY PROGRAM 2
 #define ENTRY_FILES_DIR "../Program1/"
@@ -102,6 +107,11 @@ StudentNode* addStudent(StudentNode*, StudentInfo*);
 //  RECURSIVELY RETURNS THE ORIGINAL TREE WITH THE NODE ADDED
 CourseNode* addCourse(CourseNode*, CourseInfo*);
 
+//  RECEIVES A TREE AND AN ID NUMBER
+//  RETURNS THE CORRESPONDING ID NODE
+StudentInfo* searchStudentTreeByID(StudentNode*, char*);
+
+CourseInfo* searchResultTreeByIdAndName(CourseNode*, char*, char*);
 
 //  RECURSIVELY RECEIVES A TREE AND PRINTS IT'S NODES
 void printStudentsTree(StudentNode*);
@@ -118,14 +128,20 @@ void mainMenu();
 
 //  WRITE AN ELEMENT (STUDENT OR RESULT) IN THE CORRECT FILE 
 //  RETURN A TREE WITH THE NEW ELEMENT/NODE (STUDENT OR RESULT)
-StudentNode* newStudent(FILE*, StudentNode*);
-CourseNode* newResult(FILE*, CourseNode*);
+StudentNode* newStudent(StudentNode*);
+CourseNode* newResult(CourseNode*);
+
+StudentNode* modifyStudent(StudentNode*);
+CourseNode* modifyResult(CourseNode*);
 
 //  RECEIVES THE RESULTS' FILE AND AN EMPTY TREE
 //  RETURNS THE FILLED TREE
 //  DIFFERENT OF "readResults()" THIS ONE JUST RETURNS A TREE OF RESULTS
 CourseNode* checkResults(FILE*, CourseNode*);
 
+void saveData(FILE*, FILE*, StudentNode*, CourseNode*, char*, char*);
+void writeStudentsInFile(FILE*, StudentNode*);
+void writeResultsInFile(FILE*, CourseNode*);
 
 
 /*============================PROGRAM 2 FUNCTIONS============================*/
@@ -138,6 +154,3 @@ void receiveFileName(char*, int);
 //  RETURNS THE FILLED TREE
 StudentNode* readResults(FILE*, StudentNode*);
 
-//  RECEIVES A TREE AND AN ID NUMBER
-//  RETURNS THE CORRESPONDING ID NODE
-StudentInfo* searchStudentTree(StudentNode*, char*);

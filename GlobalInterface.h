@@ -17,6 +17,10 @@
 #define TOT_PROVES 2
 #define DIM 50
 
+#define JUST_PRINT_STUDENTS 0
+#define JUST_PRINT_RESULTS 1
+#define PRINT_ALL 2
+
 //  MAIN MENU OPTIONS PROGRAM 1
 #define ADD_STUDENT_OPTION 1
 #define MODIFY_STUDENT_OPTION 2
@@ -35,6 +39,8 @@
 
 //  FILE'S DIRECTORY PROGRAM 2
 #define ENTRY_FILES_DIR "../Program1/"
+#define PASSED_RESULT 9.5
+#define TOT_COURSES_PASSED 8
 
 //  ==============================================
 //                  DATA STRUCTURES
@@ -110,11 +116,11 @@ CourseNode* addCourse(CourseNode*, CourseInfo*);
 //  RECEIVES A TREE AND AN ID NUMBER
 //  RETURNS THE CORRESPONDING ID NODE
 StudentInfo* searchStudentTreeByID(StudentNode*, char*);
-
+CourseInfo* searchResultsTreeByName(CourseNode*, char*);
 CourseInfo* searchResultTreeByIdAndName(CourseNode*, char*, char*);
 
 //  RECURSIVELY RECEIVES A TREE AND PRINTS IT'S NODES
-void printStudentsTree(StudentNode*);
+void printStudentsTree(StudentNode*, int);
 
 //  RECURSIVELY RECEIVES A TREE AND PRINTS IT'S NDOES
 void printCoursesTree(CourseNode*);
@@ -129,15 +135,11 @@ void mainMenu();
 //  WRITE AN ELEMENT (STUDENT OR RESULT) IN THE CORRECT FILE 
 //  RETURN A TREE WITH THE NEW ELEMENT/NODE (STUDENT OR RESULT)
 StudentNode* newStudent(StudentNode*);
-CourseNode* newResult(CourseNode*);
+StudentNode* newResult(StudentNode*);
 
 StudentNode* modifyStudent(StudentNode*);
 CourseNode* modifyResult(CourseNode*);
 
-//  RECEIVES THE RESULTS' FILE AND AN EMPTY TREE
-//  RETURNS THE FILLED TREE
-//  DIFFERENT OF "readResults()" THIS ONE JUST RETURNS A TREE OF RESULTS
-CourseNode* checkResults(FILE*, CourseNode*);
 
 void saveData(FILE*, FILE*, StudentNode*, CourseNode*, char*, char*);
 void writeStudentsInFile(FILE*, StudentNode*);
@@ -154,3 +156,6 @@ void receiveFileName(char*, int);
 //  RETURNS THE FILLED TREE
 StudentNode* readResults(FILE*, StudentNode*);
 
+StudentNode* passedStudentsGenerator(StudentNode* tree, StudentNode* passed_students_tree);
+
+int passedCoursesCounter(CourseNode* courses, int counter);

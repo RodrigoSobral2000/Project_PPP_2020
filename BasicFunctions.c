@@ -2,7 +2,7 @@
 int stringChecker(char *str, char* error) {
     for (unsigned int i=0 ; i<strlen(str);i++){
         if (str[i] >= '0' && str[i] <= '9') {
-            printf("\nERROR 406! %s!!\n\n", error);
+            printf("\n406! %s!!\n\n", error);
             return -1;
         }
     }
@@ -13,14 +13,14 @@ int intChecker(char *str_number, char number_type, char* error) {
     if (number_type=='i') {
         for (unsigned int i=0 ; i<strlen(str_number);i++){
             if (str_number[i] < '0' || str_number[i] > '9') {
-                printf("\nERROR 406! %s!!\n\n", error);
+                printf("\n406! %s!!\n\n", error);
                 return -1;
             }
         } return atoi(str_number);
     } else {
         for (unsigned int i=0 ; i<strlen(str_number);i++){
             if ((str_number[i] < '0' || str_number[i] > '9')) {
-                printf("\nERROR 406! %s!!\n\n", error);
+                printf("\n406! %s!!\n\n", error);
                 return -1;
             }
         } return 1;
@@ -31,7 +31,7 @@ float floatChecker(char* str_number, char number_type, char* error) {
     if (number_type=='f') {
         for (unsigned int i=0 ; i<strlen(str_number);i++){
             if ((str_number[i] < '0' || str_number[i] > '9') && str_number[i]!=',' && str_number[i]!='.') {
-                printf("\nERROR 406! %s!!\n\n", error);
+                printf("\n406! %s!!\n\n", error);
                 return -1;
             }
             else if (str_number[i]==',') str_number[i]='.';
@@ -39,13 +39,22 @@ float floatChecker(char* str_number, char number_type, char* error) {
     } else {
         for (unsigned int i=0 ; i<strlen(str_number);i++){
             if ((str_number[i] < '0' || str_number[i] > '9') && str_number[i]!=',' && str_number[i]!='.') {
-                printf("\nERROR 406! %s!!\n\n", error);
+                printf("\n406! %s!!\n\n", error);
                 return -1;
             }
         } return -2;
     }
 }
 
+
+void receiveFileName(char* file_name, int file_id) {
+    char aux_file_name[DIM/2];
+    if (file_id==1) printf("WHAT IS THE NAME OF STUDENTS' DATA FILE? (no extension needed)\nNAME: ");
+    else if (file_id==2) printf("WHAT IS THE NAME OF RESULTS' DATA FILE? (no extension needed)\nNAME: ");
+    scanf(" %[^\n]", aux_file_name);
+    strcat(file_name, aux_file_name);
+    strcat(file_name, ".bin");
+}
 
 StudentNode* readStudents(FILE* file, StudentNode* tree) {
     StudentInfo* new_student= NULL;
@@ -60,6 +69,30 @@ StudentNode* readStudents(FILE* file, StudentNode* tree) {
     return tree;
 }
 
+StudentNode* readResults(FILE* file, StudentNode* tree) {
+    CourseInfo* new_course= NULL;
+    StudentInfo* aux_student= NULL;
+    int prove_id;
+    while (!feof(file)) {
+        new_course= (CourseInfo*) malloc(sizeof(CourseInfo));
+        aux_student=(StudentInfo*) malloc(sizeof(StudentInfo));
+        fread(new_course->aux_id, sizeof(new_course->aux_id), 1, file);
+        if (feof(file)) break;
+        fread(new_course->name, sizeof(new_course->name), 1, file);
+        if (feof(file)) break;
+        fread(&prove_id, sizeof(int), 1, file);
+        if (feof(file)) break;
+        fread(&new_course->classifications[prove_id-1], sizeof(float), 1, file);
+        if (prove_id==1) new_course->classifications[1]=0;
+        else new_course->classifications[0]=0;
+
+        aux_student= searchStudentTreeByID(tree, new_course->aux_id);
+        if (aux_student!=NULL) aux_student->signed_in_courses= addCourse(aux_student->signed_in_courses, new_course);
+    }
+    free(new_course);
+    free(aux_student);
+    return tree;
+}
 
 StudentNode* addStudent(StudentNode *tree, StudentInfo* new_student) {
     int cond;
@@ -102,11 +135,24 @@ StudentInfo* searchStudentTreeByID(StudentNode* tree, char* id) {
     }
 }
 
+CourseInfo* searchResultsTreeByName(CourseNode* tree, char* name) {
+    if (tree==NULL) return NULL;
+    else {
+        if (strcasecmp(tree->course->name, name)!=0) {
+            CourseInfo* course_searched= (CourseInfo*)malloc(sizeof(CourseInfo));
+            course_searched= searchResultTreeByName(tree->left, name);
+            if (course_searched!=NULL) return course_searched;
+            course_searched= searchResultTreeByName(tree->right, name);
+            return course_searched;
+        } else return tree->course;
+    }
+}
+
 CourseInfo* searchResultTreeByIdAndName(CourseNode* tree, char* id, char* name) {
     if (tree==NULL) return NULL;
     else {
         CourseInfo* result_searched= (CourseInfo*)malloc(sizeof(CourseInfo));
-        if (strcasecmp(tree->course->aux_id, id)!=0 && strcasecmp(tree->course->name, name)!=0) {
+        if (strcasecmp(tree->course->aux_id, id)!=0 || strcasecmp(tree->course->name, name)!=0) {
             result_searched= searchResultTreeByIdAndName(tree->left, id, name);
             if (result_searched!=NULL) return result_searched;
             result_searched= searchResultTreeByIdAndName(tree->right, id, name);
@@ -115,12 +161,14 @@ CourseInfo* searchResultTreeByIdAndName(CourseNode* tree, char* id, char* name) 
     }
 }
 
-void printStudentsTree(StudentNode* tree) {
+void printStudentsTree(StudentNode* tree, int print_mode) {
     if (tree != NULL) {
-        printStudentsTree(tree->left);
-        printf("Name: %s\tID Number: %s\n", tree->student->name, tree->student->id_number);
-        if (tree->student->signed_in_courses!=NULL) printCoursesTree(tree->student->signed_in_courses);
-        printStudentsTree(tree->right);
+        printStudentsTree(tree->left, print_mode);
+        if (print_mode==JUST_PRINT_STUDENTS || print_mode==PRINT_ALL)
+            printf("Name: %s\tID Number: %s\n", tree->student->name, tree->student->id_number);
+        if ((print_mode==JUST_PRINT_RESULTS || print_mode==PRINT_ALL) && tree->student->signed_in_courses!=NULL)
+            printCoursesTree(tree->student->signed_in_courses);
+        printStudentsTree(tree->right, print_mode);
     }
 }
 
@@ -129,5 +177,14 @@ void printCoursesTree(CourseNode* tree) {
         printCoursesTree(tree->left);
         printf("Student: %s\tCourse: %s\tProve1: %.2f\tProve2: %.2f\n", tree->course->aux_id, tree->course->name, tree->course->classifications[0], tree->course->classifications[1]);
         printCoursesTree(tree->right);
+    }
+}
+
+void writeStudentsInFile(FILE* fp, StudentNode* tree) {
+    if (tree != NULL) {
+        writeStudentsInFile(fp, tree->left);
+        fwrite(tree->student->name, sizeof(tree->student->name), 1, fp);
+        fwrite(tree->student->id_number, sizeof(tree->student->id_number), 1, fp);
+        writeStudentsInFile(fp, tree->right);
     }
 }

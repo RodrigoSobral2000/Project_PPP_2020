@@ -46,6 +46,13 @@
 //                  DATA STRUCTURES
 //  ==============================================
 
+typedef struct aux_course_names StringArray;
+struct aux_course_names {
+    char string[DIM];
+    /*------------*/
+    StringArray *next;
+};
+
 //  NODE WITH COURSES' INFORMATION
 typedef struct {
     char name[DIM];
@@ -116,8 +123,7 @@ CourseNode* addCourse(CourseNode*, CourseInfo*);
 //  RECEIVES A TREE AND AN ID NUMBER
 //  RETURNS THE CORRESPONDING ID NODE
 StudentInfo* searchStudentTreeByID(StudentNode*, char*);
-CourseInfo* searchResultsTreeByName(CourseNode*, char*);
-CourseInfo* searchResultTreeByIdAndName(CourseNode*, char*, char*);
+CourseInfo* searchResultTreeByName(CourseNode*, char*);
 
 //  RECURSIVELY RECEIVES A TREE AND PRINTS IT'S NODES
 void printStudentsTree(StudentNode*, int);
@@ -138,11 +144,11 @@ StudentNode* newStudent(StudentNode*);
 StudentNode* newResult(StudentNode*);
 
 StudentNode* modifyStudent(StudentNode*);
-CourseNode* modifyResult(CourseNode*);
+StudentNode* modifyResult(StudentNode*);
 
 
-void saveData(FILE*, FILE*, StudentNode*, CourseNode*, char*, char*);
-void writeStudentsInFile(FILE*, StudentNode*);
+void saveData(FILE*, FILE*, StudentNode*, char*, char*);
+void writeStudentsInFile(FILE*, FILE*, StudentNode*, int);
 void writeResultsInFile(FILE*, CourseNode*);
 
 

@@ -6,8 +6,8 @@ int main(int argc, char *argv[]) {
     static FILE *results_file;
     static char students_file_name[DIM/2], results_file_name[DIM/2];
     static StudentNode *students_tree=NULL;
-    receiveFileName(students_file_name, ID_STUDENT_FILE);
-    receiveFileName(results_file_name, ID_RESULTS_FILE);
+    receiveFileName(students_file_name, ID_STUDENT_FILE, ".bin");
+    receiveFileName(results_file_name, ID_RESULTS_FILE, ".bin");
 
     if(access(students_file_name, F_OK)!=-1) {
         students_file= fopen(students_file_name, "rb");
@@ -76,11 +76,11 @@ void mainMenu() {
     printf("\t|-------------------------------------------------------|\n");
     printf("\t|\t1=> REGIST A STUDENT\t\t\t\t|\n");
     printf("\t|\t2=> MODIFY A STUDENT\t\t\t\t|\n");
-    printf("\t|\t3=> DELETE A STUDENT\t\t\t\t|\n");
+    printf("\t|\t3=> DELETE A STUDENT (not funcional)\t\t|\n");
     printf("\t|-------------------------------------------------------|\n");
     printf("\t|\t4=> REGIST A RESULT\t\t\t\t|\n");
     printf("\t|\t5=> MODIFY A RESULT\t\t\t\t|\n");
-    printf("\t|\t6=> DELETE A RESULT\t\t\t\t|\n");
+    printf("\t|\t6=> DELETE A RESULT (not funcional)\t\t|\n");
     printf("\t|-------------------------------------------------------|\n");
     printf("\t|\t7=> PRINT CURRENT STUDENTS\t\t\t|\n");
     printf("\t|\t8=> PRINT CURRENT RESULTS\t\t\t|\n");
@@ -143,7 +143,7 @@ StudentNode* newResult(StudentNode* tree) {
     while(1) {
         printf("\n\t%s RESULT IN PROVE NUMBER %d OF %s: ", new_result->aux_id, result_id--, new_result->name);
         scanf(" %[^\n]", str_result);
-        if ((new_result->classifications[result_id]= floatChecker(str_result, 'f', "INTRODUCE A VALID PROVE NUMBER"))>=0 && new_result->classifications[result_id]<=20) break;
+        if ((new_result->classifications[result_id]= floatChecker(str_result, 'f', "INTRODUCE A VALID PROVE NUMBER"))>0 && new_result->classifications[result_id]<=20) break;
         else printf("\n\t406! INTRODUCE A VALID RESULT!\n\n");
     } printf("\n\t200! RESULT ADDED WITH SUCESS!!\n");
 

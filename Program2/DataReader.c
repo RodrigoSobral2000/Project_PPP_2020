@@ -1,12 +1,6 @@
 #include "../GlobalInterface.h"
 #include "../BasicFunctions.c"
 
-int isIn(StringArray* array, char* name);
-StringArray* addName(StringArray* array, char* name);
-StringArray* getStudentCourses(CourseNode* tree, StringArray* names_array);
-StringArray* getAllCourses(StudentNode* tree, StringArray* names_array);
-void printNames(StringArray* names);
-
 int main() {
     StudentNode* all_students=NULL;
     StudentNode* passed_students_tree=NULL;
@@ -18,15 +12,14 @@ int main() {
     while (1) {
         system("cls");
         strcpy(students_file_name, ENTRY_FILES_DIR);
-        receiveFileName(students_file_name, ID_STUDENT_FILE);
+        receiveFileName(students_file_name, ID_STUDENT_FILE, ".bin");
         entry_file_students= fopen(students_file_name, "rb");
         if (entry_file_students!=NULL) break;
         else printf("\n404! FILE OF STUDENTS NOT FOUND!\n\n");
         sleep(2);
-    } 
-    while (1) {
+    }  while (1) {
         strcpy(results_file_name, ENTRY_FILES_DIR);
-        receiveFileName(results_file_name, ID_RESULTS_FILE);
+        receiveFileName(results_file_name, ID_RESULTS_FILE, ".bin");
         entry_file_results= fopen(results_file_name, "rb");
         if (entry_file_results!=NULL) break;
         else printf("\n404! FILE OF RESULTS NOT FOUND!\n\n");
@@ -39,13 +32,11 @@ int main() {
     all_course_names= getAllCourses(all_students, all_course_names);
     if (all_course_names!=NULL) makeTables(all_students, all_course_names);
     else printf("\n400! THERE ARE NO STUDENTS TO MAKE TABLES, SO, TABLES' FILE WASN'T DONE\n\n");
-    //printNames(all_course_names);
-
 
     passed_students_tree= passedStudentsGenerator(all_students, passed_students_tree);
     if (passed_students_tree!=NULL) {
         strcpy(students_file_name, "");
-        receiveFileName(students_file_name, 4);
+        receiveFileName(students_file_name, 4, ".bin");
         FILE* passed_students_tree_file= fopen(students_file_name, "wb");
 
         writeStudentsInFile(passed_students_tree_file, NULL, passed_students_tree, PRINT_CUR_STUDENTS);
@@ -58,18 +49,14 @@ int main() {
     return 0;
 }
 
-int isIn(StringArray* array, char* name) {
-    if (array==NULL) return 0;
-    else if (strcasecmp(array->string, name)==0) return 1;
-    else return isIn(array->next, name);
-}
 
 StringArray* addName(StringArray* array, char* name) {
     if (array == NULL) {
         array = (StringArray*) malloc(sizeof(StringArray));
         strcpy(array->string, name);
+        array->occurences=1;
         array->next= NULL;
-    } else if (strcasecmp(array->string, name)==0) return array;
+    } else if (strcasecmp(array->string, name)==0) { array->occurences++; return array;}
     else array->next = addName(array->next, name);
     return array;
 }
@@ -89,47 +76,43 @@ StringArray* getAllCourses(StudentNode* tree, StringArray* names_array) {
     }
     return names_array;
 }
-void printNames(StringArray* names) {
-    if (names!=NULL) {
-        printf("Course: %s\n", names->string);
-        printNames(names->next);
-    }
-}
 
 
-void searchCourseInStudent(FILE* tables_file, CourseNode* courses_tree, char* name) {
+void searchCourseInStudent(FILE* tables_file, CourseNode* courses_tree, char* name, StudentInfo* student) {
     if (courses_tree!=NULL)  {
-        searchCourseInStudent(tables_file, courses_tree->left, name);
+        searchCourseInStudent(tables_file, courses_tree->left, name, student);
         if (strcasecmp(courses_tree->course->name, name)==0) {
-            /* neste momento fiquei a percorrer a lista ligada dos nomes das cadeiras e a encontrar
-             * esses nomes na arvore dos alunos
-             * falta: escrever os resultados no ficheiro e desenvolver program 3
-             */
+            float final_average= (courses_tree->course->classifications[0] + courses_tree->course->classifications[1])/2;
+            fwrite(student->name, sizeof(student->name), 1, tables_file);
+            fwrite(student->id_number, sizeof(student->id_number), 1, tables_file);
+            fwrite(&final_average, sizeof(float), 1, tables_file);
         }
-        searchCourseInStudent(tables_file, courses_tree->right, name);
+        searchCourseInStudent(tables_file, courses_tree->right, name, student);
     }
 }    
-
 void searchStudentWithCourse(FILE* tables_file, StudentNode* students_tree, char* name) {
     if (students_tree!=NULL) {
         searchStudentWithCourse(tables_file, students_tree->left, name);
-        searchCourseInStudent(tables_file, students_tree->student->signed_in_courses, name);
+        searchCourseInStudent(tables_file, students_tree->student->signed_in_courses, name, students_tree->student);
         searchStudentWithCourse(tables_file, students_tree->right, name);
     }
 }
-
 void makeTables(StudentNode* students_tree, StringArray* names) {
     FILE *tables_file;
     char tables_file_name[DIM/2];
     while (1) {
         system("cls");
-        receiveFileName(tables_file_name, ID_STUDENT_FILE);
+        receiveFileName(tables_file_name, ID_STUDENT_FILE, ".bin");
         tables_file= fopen(tables_file_name, "wb");
+        if (tables_file!=NULL) break;
+        else printf("\n500! FILE COULD NOT BE CREATED!\n\n");
         sleep(2);
     } 
     
     while (names) {
-        searchCourseInStudent(tables_file, students_tree, names->string);
+        fwrite(names->string, sizeof(names->string), 1, tables_file);
+        fwrite(&names->occurences, sizeof(int), 1, tables_file);
+        searchStudentWithCourse(tables_file, students_tree, names->string);
         names=names->next;
     }
     fclose(tables_file);
@@ -139,14 +122,12 @@ void makeTables(StudentNode* students_tree, StringArray* names) {
 StudentNode* passedStudentsGenerator(StudentNode* tree, StudentNode* passed_students_tree) {
     if (tree != NULL) {
         passed_students_tree= passedStudentsGenerator(tree->left, passed_students_tree);
-        if (passedCoursesCounter(tree->student->signed_in_courses, 0)>=TOT_COURSES_PASSED) {
+        if (passedCoursesCounter(tree->student->signed_in_courses, 0)>=TOT_COURSES_PASSED)
             passed_students_tree= addStudent(passed_students_tree, tree->student);
-        }
         passed_students_tree= passedStudentsGenerator(tree->right, passed_students_tree);
     }
     return passed_students_tree;
 }
-
 int passedCoursesCounter(CourseNode* courses, int counter) {
     if (courses != NULL) {
         counter+= passedCoursesCounter(courses->left, counter);

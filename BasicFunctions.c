@@ -47,15 +47,15 @@ float floatChecker(char* str_number, char number_type, char* error) {
 }
 
 
-void receiveFileName(char* file_name, int file_id) {
+void receiveFileName(char* file_name, int file_id, char* extension) {
     char aux_file_name[DIM/2];
     if (file_id==1) printf("WHAT IS THE NAME OF STUDENTS' DATA FILE? (no extension needed)\nNAME: ");
     else if (file_id==2) printf("WHAT IS THE NAME OF RESULTS' DATA FILE? (no extension needed)\nNAME: ");
-    else if (file_id==3) printf("WHAT WILL BE THE NAME OF COURSES' TABLES FILE? (no extension needed)\nNAME: ");
+    else if (file_id==3) printf("WHAT WILL BE THE NAME OF FINAL RESULTS' TABLES FILE? (no extension needed)\nNAME: ");
     else if (file_id==4) printf("WHAT WILL BE THE NAME OF PASSED STUDENTS' FILE? (no extension needed)\nNAME: ");
     scanf(" %[^\n]", aux_file_name);
     strcat(file_name, aux_file_name);
-    strcat(file_name, ".bin");
+    strcat(file_name, extension);
 }
 
 StudentNode* readStudents(FILE* file, StudentNode* tree) {

@@ -11,7 +11,7 @@
 //                  CONSTATNS
 //  ========================================
 
-//  USEFUL
+//  COMMON
 #define ID_STUDENT_FILE 1
 #define ID_RESULTS_FILE 2
 #define TOT_PROVES 2
@@ -42,13 +42,19 @@
 #define PASSED_RESULT 9.5
 #define TOT_COURSES_PASSED 8
 
+//  FILE'S DIRECTORY PROGRAM 3
+#define ENTRY_FILES_DIR_2 "../Program2/"
+
+
 //  ==============================================
 //                  DATA STRUCTURES
 //  ==============================================
 
+//  LINKED LIST WITH (IN THIS CASE) A NAME OF A COURSE AND HOM MANY STUDENTS ARE SIGNED IN IT
 typedef struct aux_course_names StringArray;
 struct aux_course_names {
     char string[DIM];
+    int occurences;
     /*------------*/
     StringArray *next;
 };
@@ -69,14 +75,15 @@ struct aux_course {
     CourseNode *right;
 };
 
-//  NODE WITH EACH STUDENT'S INFORMATION (INCLUDING THEIR COURSES)
+//  NODE WITH EACH STUDENT INFORMATION (INCLUDING THEIR COURSES)
 typedef struct {
     char name[DIM*2];
     char id_number[DIM/2];
     CourseNode* signed_in_courses;
 } StudentInfo;
 
-//  TREE WITH ALL THE DATA
+//  TREE WITH ALL THE DATA, THIS WILL BE OUR MAIN TREE
+//  ALL THE COURSES ARE INSIDE OF EACH STUDENT
 typedef struct aux_student StudentNode;
 struct aux_student {
     StudentInfo *student;
@@ -93,75 +100,113 @@ struct aux_student {
 
 //  RECEIVE A STRING AND A MESSAGE (IN CASE OF ERROR) TO PRINT
 //  RETURNS 1 IF IT IS A CORRECT STRING, -1 IF IT ISN'T
-int stringChecker(char*, char*);
+int stringChecker(char *str, char* error);
 
-//  RECEIVE A STRING, A CHARACTER AND A MESSAGE (IN CASE OF ERROR) TO PRINT
+//  RECEIVE A STRING, A MODE TO OPERATE AND A MESSAGE (IN CASE OF ERROR) TO PRINT
 //  THE CHARACTER CAN ONLY BE 'i', 's' DEPENDING THE TYPE OF DATA WE WANT
 //      IF 'i' RETURN atoi()
 //      ELSE RETURN 1 OR -1 IF THE STRING NUMBER IS CORRECT OR WRONG
-int intChecker(char*, char, char*);
+int intChecker(char *str_number, char number_type, char* error);
 
-//  RECEIVE A STRING, A CHARACTER AND A MESSAGE (IN CASE OF ERROR) TO PRINT
+//  RECEIVE A STRING, A MODE TO OPERATE AND A MESSAGE (IN CASE OF ERROR) TO PRINT
 //  THE CHARACTER CAN ONLY BE 'f', 's' DEPENDING THE TYPE OF DATA WE WANT
 //      IF 'f' RETURN atof()
 //      ELSE RETURN 1 OR -1 IF THE STRING NUMBER IS CORRECT OR WRONG
 float floatChecker(char* str_number, char number_type, char* error);
 
+//  RECEIVES THE FILE'S DIRECTORY AND AN INT TO IDENITFY WICH FILE IT IS
+//  BASICALLY VALIDATES A FILE NAME
+void receiveFileName(char* file_name, int file_id, char* extension);
 
 //  RECEIVES THE STUDENT'S FILE AND AN EMPTY TREE
 //  RETURNS THE FILLED TREE
-StudentNode* readStudents(FILE*, StudentNode*);
+StudentNode* readStudents(FILE* file, StudentNode* tree);
+
+//  RECEIVES THE RESULTS' FILE AND AN EMPTY TREE
+//  FILLS STUDENT'S NODES WITH THEIR RESPECTIVE COURSES AND RESULTS
+//  RETURNS THE FILLED TREE
+StudentNode* readResults(FILE* file, StudentNode* tree);
 
 //  RECURSIVELY RECEIVES A TREE AND A NODE
 //  RECURSIVELY RETURNS THE ORIGINAL TREE WITH THE NODE ADDED
-StudentNode* addStudent(StudentNode*, StudentInfo*);
+StudentNode* addStudent(StudentNode *tree, StudentInfo* new_student);
 
 //  RECURSIVELY RECEIVES A TREE AND A NODE
 //  RECURSIVELY RETURNS THE ORIGINAL TREE WITH THE NODE ADDED
-CourseNode* addCourse(CourseNode*, CourseInfo*);
+CourseNode* addCourse(CourseNode *tree, CourseInfo* new_course);
 
 //  RECEIVES A TREE AND AN ID NUMBER
 //  RETURNS THE CORRESPONDING ID NODE
-StudentInfo* searchStudentTreeByID(StudentNode*, char*);
-CourseInfo* searchResultTreeByName(CourseNode*, char*);
+StudentInfo* searchStudentTreeByID(StudentNode* tree, char* id);
+CourseInfo* searchResultTreeByName(CourseNode* tree, char* name);
 
 //  RECURSIVELY RECEIVES A TREE AND PRINTS IT'S NODES
-void printStudentsTree(StudentNode*, int);
+void printStudentsTree(StudentNode* tree, int print_mode);
+//  RECURSIVELY RECEIVES A TREE AND PRINTS IT'S NODES
+void printStudentsTree(StudentNode* tree, int print_mode);
 
-//  RECURSIVELY RECEIVES A TREE AND PRINTS IT'S NDOES
-void printCoursesTree(CourseNode*);
-
-
+//  RECEIVES RESULTS' AND STUDENTS' FILES, A STUDENT NODE AND AN INT THAT DEFINES IF IT IS SUPOST TO WRITE RESULTS OR NO
+//  WRITES DATA IN STUDENTS FILE (AND RESULTS FILE)
+void writeStudentsInFile(FILE* students_file, FILE* results_file, StudentNode* tree, int write_mode);
+//  RECEIVES RESULTS' FILE AND A TREE OF COURSES
+//  WRITES DATA IN RESULTS FILE
+void writeResultsInFile(FILE* fp, CourseNode* tree);
 
 /*============================PROGRAM 1 FUNCTIONS============================*/
 
 //  JUST CLEAR THE CONSOLE AND PRINTS THE ENTIRE MAIN MENU
 void mainMenu();
 
-//  WRITE AN ELEMENT (STUDENT OR RESULT) IN THE CORRECT FILE 
-//  RETURN A TREE WITH THE NEW ELEMENT/NODE (STUDENT OR RESULT)
-StudentNode* newStudent(StudentNode*);
-StudentNode* newResult(StudentNode*);
+//  ADD A NEW STUDENT NODE TO THE MAIN TREE
+//  RETURN SAME TREE WITH THAT NEW NODE
+StudentNode* newStudent(StudentNode* tree);
+//  ADD A NEW RESULT NODE TO THE MAIN TREE
+//  RETURN SAME TREE WITH THAT NEW NODE
+StudentNode* newResult(StudentNode* tree);
 
-StudentNode* modifyStudent(StudentNode*);
-StudentNode* modifyResult(StudentNode*);
+//  RECEIVE THE MAIN TREE, SEARCH A STUDENT AND CHANGE ITS INFORMATION
+//  RETURN SAME TREE WIHT INFORMATION CHANGED
+StudentNode* modifyStudent(StudentNode* tree);
+//  RECEIVE THE MAIN TREE, SEARCH A STUDENT AND CHANGE ITS INFORMATION
+//  RETURN SAME TREE WIHT INFORMATION CHANGED
+StudentNode* modifyResult(StudentNode* tree);
 
-
-void saveData(FILE*, FILE*, StudentNode*, char*, char*);
-void writeStudentsInFile(FILE*, FILE*, StudentNode*, int);
-void writeResultsInFile(FILE*, CourseNode*);
-
+//  BASICALLY RECEIVES ALL VARIABLES NEEDED TO WRITE DATA IN THE RIGHT FILE, CREATE THE FILES AND CALL FUNCTION 'writeStudentsInFile(...)'
+void saveData(FILE* students_file, FILE* results_file, StudentNode* students_tree, char* students_file_name, char* results_file_name);
 
 /*============================PROGRAM 2 FUNCTIONS============================*/
 
-//  RECEIVES THE FILE'S DIRECTORY AND AN INT TO IDENITFY WICH FILE IT IS
-void receiveFileName(char*, int);
+//  RECEIVES A LINKED LIST AND ADD A NAME TO THAT LINKED LIST
+//  RETURN SAME LINKED LIST WITH NEW NODE
+StringArray* addName(StringArray* array, char* name);
+//  RECURSIVELY ADD THE COURSES NAMES THAT AREN'T IN THE LINKED LIST YET
+//  RETURN SAME LINKED LIST IN CASE OF A NEW COURSE NAME HAVE BEEN ADDED
+StringArray* getStudentCourses(CourseNode* tree, StringArray* names_array);
+//  BASICALLY, CALL RECURSIVELY THE FUNCTION ABOVE WITH A DIFFERENT STUDENT IN EACH CALLING
+//  RETURN THE FINAL LINKED LIST WITH ALL COURSES THAT STUDENTS MAY ARE SIGNED IN
+StringArray* getAllCourses(StudentNode* tree, StringArray* names_array);
 
-//  RECEIVES THE RESULTS' FILE AND AN EMPTY TREE
-//  FILLS STUDENT'S NODES WITH THEIR RESPECTIVE COURSES AND RESULTS
-//  RETURNS THE FILLED TREE
-StudentNode* readResults(FILE*, StudentNode*);
+//  RECEIVES THE MAIN TREE WITH A LIKED LIST WITH ALL COURSES STUDENTS MAY ARE SIGNED IN
+//  WRITES THE TABLES OF THE COURSES IN NEW BINARY FILES, WICH NAMES ARE REQUESTED BY THE USER
+void makeTables(StudentNode* students_tree, StringArray* names);
+//  RUN RECURSIVELY THE MAIN TREE CALLING, IN EACH NODE, THE FUNCTION BELOW
+void searchStudentWithCourse(FILE* tables_file, StudentNode* students_tree, char* name);
+//  RECURSIVELY SEARCH A CERTAIN COURSE, WHEN FOUND, WRITE IT INFORMATION IN THE FILE
+void searchCourseInStudent(FILE* tables_file, CourseNode* courses_tree, char* name, StudentInfo* student);
 
+//  RECEIVES THE MAIN TREE AND AN EMPTY TREE
+//  ADD A STUDENT THAT PASSED TO THAT EMPTY TREE
+//  RETURNS A NEW TREE WITH ALL PASSED STUDENTS
 StudentNode* passedStudentsGenerator(StudentNode* tree, StudentNode* passed_students_tree);
-
+//  RECEIVES THE COURSES' TREE AND A COUNTER
+//  COUNTS HOW MANY COURSES THAT STUDENT PASSED
+//  RETURNS THAT COUNTER
 int passedCoursesCounter(CourseNode* courses, int counter);
+
+/*============================PROGRAM 3 FUNCTIONS============================*/
+
+//  RECEIVES THE ENTRY BINARY FILES AND TWO STRINGS TO CREATE NEW TWO TEXT FILES
+//  READS DATA IN BINARY FILES AND WRITES IT IN A TEXT FILE (FINAL RESULTS AND PASSED STUDENTS DATA)
+void translateFiles(FILE* results_table_bin, FILE* passed_students_bin, char* file_name1, char* file_name2);
+//  RECURSIVELY WRITES THE INFO PRESENT IN PASSED STUDENTS TREE IN TEXT FILE
+void writePassedStudents(StudentNode* passed_students, FILE* passed_students_txt);

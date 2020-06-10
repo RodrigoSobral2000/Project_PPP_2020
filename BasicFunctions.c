@@ -79,6 +79,7 @@ StudentNode* readResults(FILE* file, StudentNode* tree) {
         new_course= (CourseInfo*) malloc(sizeof(CourseInfo));
         aux_student=(StudentInfo*) malloc(sizeof(StudentInfo));
         new_course->classifications[0]= new_course->classifications[1]=0;
+        
         fread(new_course->aux_id, sizeof(new_course->aux_id), 1, file);
         if (feof(file)) break;
         fread(new_course->name, sizeof(new_course->name), 1, file);
@@ -86,7 +87,7 @@ StudentNode* readResults(FILE* file, StudentNode* tree) {
         fread(&prove_id, sizeof(int), 1, file);
         if (feof(file)) break;
         fread(&new_course->classifications[prove_id], sizeof(float), 1, file);
-
+        
         aux_student= searchStudentTreeByID(tree, new_course->aux_id);        
         if (aux_student!=NULL) aux_student->signed_in_courses= addCourse(aux_student->signed_in_courses, new_course);
     }
@@ -153,6 +154,14 @@ CourseInfo* searchResultTreeByName(CourseNode* tree, char* name) {
     }
 }
 
+void printCoursesTree(CourseNode* tree) {
+    if (tree != NULL) {
+        printCoursesTree(tree->left);
+        printf("Student: %s\tCourse: %s\tProve1: %.2f\tProve2: %.2f\n", tree->course->aux_id, tree->course->name, tree->course->classifications[0], tree->course->classifications[1]);
+        printCoursesTree(tree->right);
+    }
+}
+
 void printStudentsTree(StudentNode* tree, int print_mode) {
     if (tree != NULL) {
         printStudentsTree(tree->left, print_mode);
@@ -161,14 +170,6 @@ void printStudentsTree(StudentNode* tree, int print_mode) {
         if ((print_mode==JUST_PRINT_RESULTS || print_mode==PRINT_ALL) && tree->student->signed_in_courses!=NULL)
             printCoursesTree(tree->student->signed_in_courses);
         printStudentsTree(tree->right, print_mode);
-    }
-}
-
-void printCoursesTree(CourseNode* tree) {
-    if (tree != NULL) {
-        printCoursesTree(tree->left);
-        printf("Student: %s\tCourse: %s\tProve1: %.2f\tProve2: %.2f\n", tree->course->aux_id, tree->course->name, tree->course->classifications[0], tree->course->classifications[1]);
-        printCoursesTree(tree->right);
     }
 }
 

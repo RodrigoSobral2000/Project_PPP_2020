@@ -6,6 +6,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <ctype.h>
 
 //  ========================================
 //                  CONSTATNS
@@ -104,14 +105,14 @@ int stringChecker(char *str, char* error);
 
 //  RECEIVE A STRING, A MODE TO OPERATE AND A MESSAGE (IN CASE OF ERROR) TO PRINT
 //  THE CHARACTER CAN ONLY BE 'i', 's' DEPENDING THE TYPE OF DATA WE WANT
-//      IF 'i' RETURN atoi()
-//      ELSE RETURN 1 OR -1 IF THE STRING NUMBER IS CORRECT OR WRONG
+//      IF 'i' RETURN atoi() OF THE NUMBER
+//      IF THE STRING NUMBER IS WRONG RETURN -1 
 int intChecker(char *str_number, char number_type, char* error);
 
 //  RECEIVE A STRING, A MODE TO OPERATE AND A MESSAGE (IN CASE OF ERROR) TO PRINT
 //  THE CHARACTER CAN ONLY BE 'f', 's' DEPENDING THE TYPE OF DATA WE WANT
-//      IF 'f' RETURN atof()
-//      ELSE RETURN 1 OR -1 IF THE STRING NUMBER IS CORRECT OR WRONG
+//      IF 'i' RETURN atof() OF THE NUMBER
+//      IF THE STRING NUMBER IS WRONG RETURN -1 
 float floatChecker(char* str_number, char number_type, char* error);
 
 //  RECEIVES THE FILE'S DIRECTORY AND AN INT TO IDENITFY WICH FILE IT IS
@@ -127,11 +128,11 @@ StudentNode* readStudents(FILE* file, StudentNode* tree);
 //  RETURNS THE FILLED TREE
 StudentNode* readResults(FILE* file, StudentNode* tree);
 
-//  RECURSIVELY RECEIVES A TREE AND A NODE
+//  RECURSIVELY RECEIVES A TREE AND A NODE TO BE ADDED
 //  RECURSIVELY RETURNS THE ORIGINAL TREE WITH THE NODE ADDED
 StudentNode* addStudent(StudentNode *tree, StudentInfo* new_student);
 
-//  RECURSIVELY RECEIVES A TREE AND A NODE
+//  RECURSIVELY RECEIVES A TREE AND A NODE TO BE ADDED
 //  RECURSIVELY RETURNS THE ORIGINAL TREE WITH THE NODE ADDED
 CourseNode* addCourse(CourseNode *tree, CourseInfo* new_course);
 
@@ -140,10 +141,11 @@ CourseNode* addCourse(CourseNode *tree, CourseInfo* new_course);
 StudentInfo* searchStudentTreeByID(StudentNode* tree, char* id);
 CourseInfo* searchResultTreeByName(CourseNode* tree, char* name);
 
-//  RECURSIVELY RECEIVES A TREE AND PRINTS IT'S NODES
+//  RECURSIVELY RECEIVES A TREE AND A MODE TO PRINT, IF ONLY PRNTS STUDENTS, RESULTS OR BOTH
+//  PRINTS IT'S NODES
 void printStudentsTree(StudentNode* tree, int print_mode);
 //  RECURSIVELY RECEIVES A TREE AND PRINTS IT'S NODES
-void printStudentsTree(StudentNode* tree, int print_mode);
+void printCoursesTree(CourseNode* tree);
 
 //  RECEIVES RESULTS' AND STUDENTS' FILES, A STUDENT NODE AND AN INT THAT DEFINES IF IT IS SUPOST TO WRITE RESULTS OR NO
 //  WRITES DATA IN STUDENTS FILE (AND RESULTS FILE)
@@ -156,6 +158,17 @@ void writeResultsInFile(FILE* fp, CourseNode* tree);
 
 //  JUST CLEAR THE CONSOLE AND PRINTS THE ENTIRE MAIN MENU
 void mainMenu();
+
+//  RECEIVES A TEXT FILE AND AN EMPTY TREE OF STUDENTS
+//  IF THE BINARY FILES DOESN'T EXIST, GETS INFO FROM A TEXT FILE
+//  IF TEXT FILE ALSO DOESN'T EXTIST, PROGRAM STARTS WITH NO INFORMATION
+//  RETURNS A FILLED STUDENTS' TREE
+StudentNode* readTextStudents(FILE* file, StudentNode* students_tree);
+//  RECEIVES A TEXT FILE AND AN EMPTY TREE OF STUDENTS
+//  IF THE BINARY FILES DOESN'T EXIST, GETS INFO FROM A TEXT FILE
+//  IF TEXT FILE ALSO DOESN'T EXTIST, PROGRAM STARTS WITH NO INFORMATION
+//  RETURNS A FILLED STUDENTS' TREE
+StudentNode* readTextResults(FILE* file, StudentNode* students_tree);
 
 //  ADD A NEW STUDENT NODE TO THE MAIN TREE
 //  RETURN SAME TREE WITH THAT NEW NODE

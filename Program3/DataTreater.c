@@ -2,38 +2,34 @@
 #include "../BasicFunctions.c"
 
 int main() {
-    static FILE *passed_students_file;
-    static FILE *results_file;
-    static char passed_students_file_name[DIM/2], results_file_name[DIM/2];
+    FILE *passed_students_file;
+    FILE *results_file;
+    char passed_students_file_name[DIM/2], results_file_name[DIM/2];
+    strcpy(results_file_name, ENTRY_FILES_DIR_2);
+    strcpy(passed_students_file_name, ENTRY_FILES_DIR_2);
+    
+    system("cls");
+    receiveFileName(results_file_name, ID_RESULTS_FILE, ".bin");
+    results_file= fopen(results_file_name, "rb");
+    if (results_file==NULL) printf("\n404! FILE OF FINAL RESULTS NOT FOUND!\n\n");
 
-    while (1) {
-        system("cls");
-        strcpy(passed_students_file_name, ENTRY_FILES_DIR_2);
-        receiveFileName(passed_students_file_name, ID_STUDENT_FILE, ".bin");
-        results_file= fopen(passed_students_file_name, "rb");
-        if (results_file==NULL) printf("\n404! FILE OF PASSED STUDENTS NOT FOUND!\n\n");
-        sleep(2);
-        break;
-    }  while (1) {
-        strcpy(results_file_name, ENTRY_FILES_DIR_2);
-        receiveFileName(results_file_name, ID_RESULTS_FILE, ".bin");
-        passed_students_file= fopen(results_file_name, "rb");
-        if (passed_students_file==NULL) printf("\n404! FILE OF FINAL RESULTS NOT FOUND!\n\n");
-        sleep(2);
-        break;
-    }
+    receiveFileName(passed_students_file_name, ID_STUDENT_FILE, ".bin");
+    passed_students_file= fopen(passed_students_file_name, "rb");
+    if (passed_students_file==NULL) printf("\n404! FILE OF PASSED STUDENTS NOT FOUND!\n\n");
 
     if (results_file==NULL && passed_students_file==NULL) printf("\n400! SEEMS THERE ARE NO FILES TO READ, SO WE CANNOT WRITE\n\n");
     else translateFiles(results_file, passed_students_file, results_file_name, passed_students_file_name);
+    fclose(results_file);
+    fclose(passed_students_file);
     return 0;
 }
 
-void translateFiles(FILE* bin_results, FILE* bin_passed_students, char* results_file_name, char* passed_students_file_name) {
-    strcpy(results_file_name, "");
+void translateFiles(FILE* bin_results, FILE* bin_passed_students, char* final_results_file_name, char* passed_students_file_name) {
+    strcpy(final_results_file_name, "");
     strcpy(passed_students_file_name, "");
-    receiveFileName(results_file_name, 3, ".txt");
+    receiveFileName(final_results_file_name, 3, ".txt");
     receiveFileName(passed_students_file_name, 4, ".txt");
-    FILE* final_results_file= fopen(results_file_name, "w");
+    FILE* final_results_file= fopen(final_results_file_name, "w");
     FILE* passed_students_file= fopen(passed_students_file_name, "w");
 
     char course_name[DIM], student_name[DIM*2], student_id[DIM/2];
@@ -60,7 +56,7 @@ void translateFiles(FILE* bin_results, FILE* bin_passed_students, char* results_
 
     if (bin_passed_students==NULL) printf("\n417 UPS! IT SEEMS THERE IS NO STUDENT PASSING!\n\n");
     else {
-        fprintf(final_results_file, "\t\t=============PASSED STUDENTS=============\n");
+        fprintf(passed_students_file, "\t\t=============PASSED STUDENTS=============\n");
         StudentNode* passed_students_tree= NULL;
         passed_students_tree= readStudents(bin_passed_students, passed_students_tree);
         writePassedStudents(passed_students_tree, passed_students_file);
@@ -72,8 +68,8 @@ void translateFiles(FILE* bin_results, FILE* bin_passed_students, char* results_
 
 void writePassedStudents(StudentNode* passed_students_tree, FILE* passed_students_file) {
     if (passed_students_tree!=NULL) {
-        writePassedStudents(passed_students_tree, passed_students_file);
+        writePassedStudents(passed_students_tree->left, passed_students_file);
         fprintf(passed_students_file, "\tName: %s\t\tID: %s\n", passed_students_tree->student->name, passed_students_tree->student->id_number);
-        writePassedStudents(passed_students_tree, passed_students_file);
+        writePassedStudents(passed_students_tree->right, passed_students_file);
     }
 }

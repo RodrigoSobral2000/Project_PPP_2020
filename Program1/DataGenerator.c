@@ -1,14 +1,15 @@
 #include "../GlobalInterface.h"
 #include "../BasicFunctions.c"
 
+
 int main(int argc, char *argv[]) {
     static FILE *students_file;
     static FILE *results_file;
     static char students_file_name[DIM/2], results_file_name[DIM/2];
     static StudentNode *students_tree=NULL;
+
     receiveFileName(students_file_name, ID_STUDENT_FILE, ".bin");
     receiveFileName(results_file_name, ID_RESULTS_FILE, ".bin");
-
     if(access(students_file_name, F_OK)!=-1) {
         students_file= fopen(students_file_name, "rb");
         students_tree= readStudents(students_file, students_tree);
@@ -18,6 +19,18 @@ int main(int argc, char *argv[]) {
         students_tree= readResults(results_file, students_tree);
         fclose(results_file);
     }
+
+    if (access(students_file_name, F_OK)==-1 && access(results_file_name, F_OK)==-1) {
+        strcpy(students_file_name, strcat(strtok(students_file_name, "."), ".txt") );
+        strcpy(results_file_name, strcat(strtok(results_file_name, "."), ".txt") );
+        students_file= fopen(students_file_name, "r");
+        if (students_file!=NULL) students_tree= readTextStudents(students_file, students_tree);
+        fclose(students_file);
+        
+        results_file= fopen(results_file_name, "r");
+        if (results_file!=NULL) students_tree= readTextResults(results_file, students_tree);
+        fclose(results_file);
+    } 
 
     static int option;
     static char str_option[5];
@@ -67,6 +80,55 @@ int main(int argc, char *argv[]) {
     fclose(results_file);
     
     return 0;
+}
+
+StudentNode* readTextStudents(FILE* file, StudentNode* students_tree) {
+    char line[DIM*4], aux_str[DIM];
+    StudentInfo* new_student= NULL;
+    while (!feof(file)) {
+        new_student= (StudentInfo*) malloc(sizeof(StudentInfo));
+        fgets(line, DIM*4, file);
+        strcpy(aux_str, strtok(line, "|"));
+        if (stringChecker(aux_str, "ERROR ON FILE FORMAT")==1) strcpy(new_student->name, aux_str);
+        else continue;
+    
+        strcpy(aux_str, strtok(NULL, "\n"));
+        if (intChecker(aux_str, 's', "ERROR ON FILE FORMAT")==1) strcpy(new_student->id_number, aux_str);
+        students_tree= addStudent(students_tree, new_student);
+    }
+    free(new_student);
+    return students_tree;
+}
+
+StudentNode* readTextResults(FILE* file, StudentNode* students_tree) {
+    char line[DIM*4], aux_str[DIM];
+    int prove_id;
+    float result;
+    StudentInfo* new_result_student=NULL;
+    CourseInfo* new_result=NULL;
+
+    while (!feof(file)) {
+        fgets(line, DIM*4, file);
+        strcpy(aux_str, strtok(line, " "));
+        if (intChecker(aux_str, 's', "ERROR ON FILE FORMAT")!=1) continue;
+        if((new_result_student= searchStudentTreeByID(students_tree, aux_str))==NULL) continue;
+        strcpy(aux_str, strtok(NULL, " "));
+        if (stringChecker(aux_str, "ERROR ON FILE FORMAT")==-1) continue;
+        if ((new_result=searchResultTreeByName(new_result_student->signed_in_courses, aux_str))==NULL) {
+            new_result= (CourseInfo*) malloc(sizeof(CourseInfo));
+            strcpy(new_result->name, aux_str); 
+            strcpy(new_result->aux_id, new_result_student->id_number);
+        }
+        strcpy(aux_str, strtok(NULL, " "));
+        if ((prove_id=intChecker(aux_str, 'i', "ERROR ON FILE FORMAT")-1)==-1) continue;
+
+        strcpy(aux_str, strtok(NULL, "\n"));  
+        if ((result=floatChecker(aux_str, 'f', "ERROR ON FILE FORMAT"))==-1) continue;
+        new_result->classifications[prove_id]= result;
+
+        new_result_student->signed_in_courses= addCourse(new_result_student->signed_in_courses, new_result);
+    }
+    return students_tree;
 }
 
 void mainMenu() {
@@ -268,6 +330,8 @@ StudentNode* modifyResult(StudentNode* tree) {
 }
 
 void saveData(FILE* students_file, FILE* results_file, StudentNode* students_tree, char* students_file_name, char* results_file_name) {
+    strcpy(students_file_name, strcat(strtok(students_file_name, "."), ".bin") );
+    strcpy(results_file_name, strcat(strtok(results_file_name, "."), ".bin") );
     students_file=fopen(students_file_name, "wb");
     results_file= fopen(results_file_name, "wb");
     writeStudentsInFile(students_file, results_file, students_tree, PRINT_ALL);

@@ -104,8 +104,6 @@ void makeTables(StudentNode* students_tree, StringArray* names) {
     while (names) {
         fwrite(names->string, sizeof(names->string), 1, tables_file);
         fwrite(&names->occurences, sizeof(int), 1, tables_file);
-        printf("CADEIRA: %s\tALUNOS: %d\n\n", names->string, names->occurences);
-
         searchStudentWithCourse(tables_file, students_tree, names->string);
         names=names->next;
     }

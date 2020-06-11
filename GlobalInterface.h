@@ -53,7 +53,7 @@
 
 //  LINKED LIST WITH (IN THIS CASE) A NAME OF A COURSE AND HOM MANY STUDENTS ARE SIGNED IN IT
 typedef struct aux_course_names StringArray;
-struct aux_course_names {
+static struct aux_course_names {
     char string[DIM];
     int occurences;
     /*------------*/
@@ -61,32 +61,34 @@ struct aux_course_names {
 };
 
 //  NODE WITH COURSES' INFORMATION
-typedef struct {
+typedef struct crs_info CourseInfo;
+static struct crs_info {
     char name[DIM];
     float classifications[TOT_PROVES];
     //  ONLY TO USE IN PRINTS OF PROGRAM 1
     char aux_id[DIM/2];
-} CourseInfo;
+};
 
 //  TREE WITH ALL COURSES OF EACH STUDENT
 typedef struct aux_course CourseNode;
-struct aux_course {
+static struct aux_course {
     CourseInfo *course;
     CourseNode *left;
     CourseNode *right;
 };
 
 //  NODE WITH EACH STUDENT INFORMATION (INCLUDING THEIR COURSES)
-typedef struct {
+typedef struct std_info StudentInfo;
+static struct std_info {
     char name[DIM*2];
     char id_number[DIM/2];
     CourseNode* signed_in_courses;
-} StudentInfo;
+};
 
 //  TREE WITH ALL THE DATA, THIS WILL BE OUR MAIN TREE
 //  ALL THE COURSES ARE INSIDE OF EACH STUDENT
 typedef struct aux_student StudentNode;
-struct aux_student {
+static struct aux_student {
     StudentInfo *student;
     StudentNode *left;
     StudentNode *right;

@@ -3,10 +3,10 @@
 
 
 int main(int argc, char *argv[]) {
-    static FILE *students_file;
-    static FILE *results_file;
-    static char students_file_name[DIM/2], results_file_name[DIM/2];
-    static StudentNode *students_tree=NULL;
+    FILE *students_file;
+    FILE *results_file;
+    char students_file_name[DIM/2], results_file_name[DIM/2];
+    StudentNode *students_tree=NULL;
 
     receiveFileName(students_file_name, ID_STUDENT_FILE, ".bin");
     receiveFileName(results_file_name, ID_RESULTS_FILE, ".bin");
@@ -32,8 +32,8 @@ int main(int argc, char *argv[]) {
         fclose(results_file);
     } 
 
-    static int option;
-    static char str_option[5];
+    int option;
+    char str_option[5];
 
     //  RECEIVES OPTIONS
     while (1) {
@@ -172,8 +172,8 @@ StudentNode* newStudent(StudentNode* tree) {
 StudentNode* newResult(StudentNode* tree) {
     CourseInfo* new_result= (CourseInfo*) malloc(sizeof(CourseInfo));
     StudentInfo* student_result= (StudentInfo*) malloc(sizeof(StudentInfo));
-    static char str_result_id[DIM/5], str_result[DIM/5];
-    static int result_id;
+    char str_result_id[DIM/5], str_result[DIM/5];
+    int result_id;
     new_result->classifications[0]= new_result->classifications[1]= 0;
     
     while(1) {

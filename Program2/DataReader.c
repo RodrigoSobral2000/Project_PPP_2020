@@ -2,12 +2,12 @@
 #include "../BasicFunctions.c"
 
 int main() {
-    static StudentNode* all_students=NULL;
-    static StudentNode* passed_students_tree=NULL;
-    static StringArray* all_course_names=NULL;
-    static FILE *entry_file_students;
-    static FILE *entry_file_results;
-    static char students_file_name[DIM/2], results_file_name[DIM/2];
+    StudentNode* all_students=NULL;
+    StudentNode* passed_students_tree=NULL;
+    StringArray* all_course_names=NULL;
+    FILE *entry_file_students;
+    FILE *entry_file_results;
+    char students_file_name[DIM/2], results_file_name[DIM/2];
 
     while (1) {
         system("cls");

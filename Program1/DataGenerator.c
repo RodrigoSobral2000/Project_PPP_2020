@@ -3,10 +3,10 @@
 
 
 int main(int argc, char *argv[]) {
-    FILE *students_file;
-    FILE *results_file;
-    char students_file_name[DIM/2], results_file_name[DIM/2];
-    StudentNode *students_tree=NULL;
+    static FILE *students_file;
+    static FILE *results_file;
+    static char students_file_name[DIM/2], results_file_name[DIM/2];
+    static StudentNode *students_tree=NULL;
 
     receiveFileName(students_file_name, ID_STUDENT_FILE, ".bin");
     receiveFileName(results_file_name, ID_RESULTS_FILE, ".bin");

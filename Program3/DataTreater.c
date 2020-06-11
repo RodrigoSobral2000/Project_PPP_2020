@@ -2,9 +2,9 @@
 #include "../BasicFunctions.c"
 
 int main() {
-    FILE *passed_students_file;
-    FILE *results_file;
-    char passed_students_file_name[DIM/2], results_file_name[DIM/2];
+    static FILE *passed_students_file;
+    static FILE *results_file;
+    static char passed_students_file_name[DIM/2], results_file_name[DIM/2];
     strcpy(results_file_name, ENTRY_FILES_DIR_2);
     strcpy(passed_students_file_name, ENTRY_FILES_DIR_2);
     
